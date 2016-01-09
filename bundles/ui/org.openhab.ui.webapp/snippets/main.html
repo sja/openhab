@@ -32,8 +32,7 @@
         if (evt.context[0].indexOf(hash) >= 0 || hash == "Home") {
           if (evt.target.responseXML) {
             if (evt.context[0].indexOf("poll=true") >= 0) {
-              OH.pollURL = evt.context[0];
-              OH.pollingRequest = WA.Request(evt.context[0], null, -1, true, null);
+	       		WA.Request(evt.context[0], null, -1, true, null);	
             }
           }
         }
@@ -50,19 +49,15 @@
         }
         search = search + "sitemap=%sitemap%&w=" + hash.substring(2) + "&poll=true";
         url = path + search;
-        OH.pollURL = url;
-        OH.pollingRequest = WA.Request(url, null, -1, true, null);
+        WA.Request(url, null, -1, true, null);
         OH.images.refresh = OH.images.countOnPage;
         OH.images.countOnPage = 0;
       });
 
       WA.AddEventListener("load", function () {
-    	var url = '?sitemap=%sitemap%&poll=true';
-    	OH.pollURL = url;
-
-    	setTimeout(function() {
-          OH.pollingRequest = WA.Request(url, null, -1, true, null);
-        }, 1500);
+        setTimeout(function() {
+          WA.Request('../%servletname%?sitemap=%sitemap%&poll=true', null, -1, true, null);
+          }, 1500);
       });
 
       // Global scope for openHAB
@@ -73,11 +68,11 @@
     	  var resetAllTimers = function() {
     		OH.dimmer.resetTimer();
       	  	OH.rollershutter.resetTimer();
-    	  }
+    	  };
 
     	  var stopEventDefault = function(event) {
     		  event.preventDefault();
-          }
+          };
 
     	  var resetVideos = function() {
     		$("video").each(function(){
@@ -85,27 +80,11 @@
     		  videoEl.pause();
     		  videoEl.currentTime = 0;
   			});
-    	  }
+    	  };
 
      	  // Stop all intervals to prevent left repeated XHRs on page change (multitouch)
           WA.AddEventListener("endslide", resetAllTimers);
           WA.AddEventListener("endslide", resetVideos);
-
-          WA.AddEventListener("sliderchange", function(ev) {
-            var data = ev.context;
-            var request = '/CMD?' + data.item + '=' + data.value;
-
-            switch(data.type) {
-            case "start":
-            	WA.CancelRequest(OH.pollingRequest);
-            	break;
-            case "end":
-            	OH.pollingRequest = WA.Request(OH.pollURL, null, -1, true, null);
-            	break;
-            }
-
-            WA.Request(request, null, null, true, null);
-          });
 
           // Disable dragging to prevent accidential infinite loop
           $('body')
@@ -119,7 +98,7 @@
         		event.stopPropagation();
         		event.preventDefault();
         	}
-      }
+      };
 
       OH.changeState = function changeState(request) {
         WA.Request(request, null, null, true);
